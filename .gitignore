@@ -1,0 +1,19 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+*.egg-info/
+
+# Test and build output
+.report.json
+out/
+dist/
+build/
+
+# Editors
+.idea/
+.vscode/
+.DS_Store

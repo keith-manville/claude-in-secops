@@ -1,0 +1,47 @@
+creator: admin
+description: Triage the current alert with Claude. The action sends the case, alert, security events and entities to Claude and returns a structured assessment with a verdict, confidence, suggested severity, attack narrative, key findings, MITRE ATT&CK techniques, indicators of compromise and recommended actions. Alert data is passed to Claude as untrusted data inside <alert_data> tags. This action does not work with Google SecOps entities.
+dynamic_results_metadata:
+-   result_example_path: resources/summarize_alert_JsonResult_example.json
+    result_name: JsonResult
+    show_result: true
+integration_identifier: Claude
+name: Summarize Alert
+parameters:
+-   default_value: null
+    description: Optional instructions for the analysis, for example which detections to focus on or what the organization considers normal.
+    is_mandatory: false
+    name: Additional Instructions
+    type: content
+-   default_value: '25'
+    description: Maximum number of security events from the alert to include in the prompt (1 to 200).
+    is_mandatory: false
+    name: Max Events
+    type: string
+-   default_value: true
+    description: If enabled, enrichment properties already attached to the entities are included in the prompt.
+    is_mandatory: false
+    name: Include Entity Properties
+    type: boolean
+-   default_value: true
+    description: If enabled, the triage summary is added to the case as an insight.
+    is_mandatory: false
+    name: Create Insight
+    type: boolean
+-   default_value: false
+    description: If enabled, a short version of the triage summary is added to the case wall as a comment.
+    is_mandatory: false
+    name: Add Comment
+    type: boolean
+-   default_value: Default
+    description: Reasoning effort for this request. "Default" uses the effort configured on the integration.
+    is_mandatory: false
+    name: Effort
+    optional_values:
+    - Default
+    - low
+    - medium
+    - high
+    - xhigh
+    - max
+    type: ddl
+script_result_name: is_success

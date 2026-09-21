@@ -1,0 +1,58 @@
+creator: admin
+description: Ask Claude to assess the entities in the scope of the alert. For every supported entity, Claude receives the entity identifier, type and enrichment properties already gathered by other integrations and returns a verdict, confidence, risk score, reasoning and recommended actions. Results are added to the entity as enrichment fields with the "Claude_" prefix and optionally as an entity insight. Claude has no live threat intelligence access, so the assessment is based on the provided data and general security knowledge. Supported entities depend on the "Entity Type" parameter.
+dynamic_results_metadata:
+-   result_example_path: resources/assess_entities_JsonResult_example.json
+    result_name: JsonResult
+    show_result: true
+integration_identifier: Claude
+name: Assess Entities
+parameters:
+-   default_value: All Entities
+    description: Defines which entities from the scope of the alert are assessed.
+    is_mandatory: true
+    name: Entity Type
+    optional_values:
+    - All Entities
+    - IP Address
+    - Hostname
+    - Domain
+    - URL
+    - File Hash
+    - File Name
+    - User
+    - Process
+    - Email Subject
+    type: ddl
+-   default_value: null
+    description: Optional instructions for the assessment, for example known-good ranges, naming conventions or what to focus on.
+    is_mandatory: false
+    name: Additional Instructions
+    type: content
+-   default_value: false
+    description: If enabled, the current alert, its events and its other entities are included in every request as additional context.
+    is_mandatory: false
+    name: Include Alert Context
+    type: boolean
+-   default_value: false
+    description: If enabled, entities that Claude assesses as Malicious are marked as suspicious in Google SecOps.
+    is_mandatory: false
+    name: Mark Malicious Entities As Suspicious
+    type: boolean
+-   default_value: true
+    description: If enabled, an entity insight with the assessment is created for every assessed entity.
+    is_mandatory: false
+    name: Create Insight
+    type: boolean
+-   default_value: Default
+    description: Reasoning effort for the requests. "Default" uses the effort configured on the integration.
+    is_mandatory: false
+    name: Effort
+    optional_values:
+    - Default
+    - low
+    - medium
+    - high
+    - xhigh
+    - max
+    type: ddl
+script_result_name: is_success

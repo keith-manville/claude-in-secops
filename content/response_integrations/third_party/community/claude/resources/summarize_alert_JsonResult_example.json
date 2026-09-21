@@ -1,0 +1,48 @@
+{
+    "summary": "A PowerShell process spawned by winword.exe on WS-FIN-042 executed an encoded command that downloaded a payload from 203.0.113.45. The user jdoe opened an invoice attachment shortly before the activity started.",
+    "verdict": "Malicious",
+    "confidence": "High",
+    "suggested_severity": "High",
+    "attack_narrative": "1. jdoe opened invoice_4471.docm from an external email. 2. winword.exe spawned powershell.exe with -enc and -w hidden arguments (event 2). 3. PowerShell downloaded stage2.dll from http://203.0.113.45/s2 (event 3).",
+    "key_findings": [
+        "Office application spawning PowerShell with an encoded command",
+        "Outbound connection to an IP address with no business justification",
+        "Macro-enabled document received from an external sender"
+    ],
+    "mitre_attack_techniques": [
+        {
+            "technique_id": "T1566.001",
+            "name": "Phishing: Spearphishing Attachment"
+        },
+        {
+            "technique_id": "T1059.001",
+            "name": "Command and Scripting Interpreter: PowerShell"
+        }
+    ],
+    "indicators_of_compromise": [
+        {
+            "value": "203.0.113.45",
+            "type": "ip_address"
+        },
+        {
+            "value": "invoice_4471.docm",
+            "type": "file_name"
+        }
+    ],
+    "recommended_actions": [
+        "Isolate WS-FIN-042 from the network",
+        "Reset the credentials of jdoe and review recent sign-ins",
+        "Block 203.0.113.45 at the perimeter and search for other hosts that contacted it"
+    ],
+    "open_questions": [
+        "Was stage2.dll executed and is it still present on the host?",
+        "Did other mailboxes receive the same attachment?"
+    ],
+    "model": "claude-opus-5",
+    "usage": {
+        "input_tokens": 3120,
+        "output_tokens": 611,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0
+    }
+}

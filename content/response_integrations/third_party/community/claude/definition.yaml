@@ -1,0 +1,58 @@
+identifier: Claude
+name: Claude
+description: Claude by Anthropic is a family of frontier AI models. This integration lets Google SecOps SOAR playbooks send prompts to Claude, triage alerts, assess entities and extract indicators of compromise using the Claude API.
+parameters:
+-   name: API Root
+    default_value: https://api.anthropic.com
+    type: string
+    description: Base URL of the Claude API. Keep the default unless you route requests through a gateway or proxy that exposes the Anthropic Messages API.
+    is_mandatory: true
+    integration_identifier: Claude
+-   name: API Key
+    default_value: null
+    type: password
+    description: Anthropic API key used to authenticate requests. Create one in the Claude Console (https://platform.claude.com).
+    is_mandatory: true
+    integration_identifier: Claude
+-   name: Model
+    default_value: claude-opus-5
+    type: string
+    description: Default Claude model ID used by all actions, for example claude-opus-5 or claude-sonnet-5. Individual actions can override it.
+    is_mandatory: true
+    integration_identifier: Claude
+-   name: Max Output Tokens
+    default_value: 8192
+    type: integer
+    description: Default maximum number of output tokens Claude may generate per request. Individual actions can override it. Values above 20000 are not supported because requests are sent without streaming.
+    is_mandatory: true
+    integration_identifier: Claude
+-   name: Effort
+    default_value: high
+    type: string
+    description: Default reasoning effort sent as output_config.effort. One of low, medium, high, xhigh or max. Set to Default to omit the parameter and use the model's own default.
+    is_mandatory: false
+    integration_identifier: Claude
+-   name: Adaptive Thinking
+    default_value: true
+    type: boolean
+    description: If enabled, requests are sent with adaptive extended thinking. Disable this only for models that do not support adaptive thinking, such as Claude Haiku 4.5.
+    is_mandatory: false
+    integration_identifier: Claude
+-   name: Request Timeout
+    default_value: 300
+    type: integer
+    description: Timeout in seconds for a single request to the Claude API. Make sure the action timeout in SOAR is larger than this value.
+    is_mandatory: true
+    integration_identifier: Claude
+-   name: Verify SSL
+    default_value: true
+    type: boolean
+    description: If enabled, the integration validates the SSL certificate of the Claude API endpoint.
+    is_mandatory: true
+    integration_identifier: Claude
+documentation_link: https://platform.claude.com/docs/en/api/messages
+categories:
+- AI
+- Enrichment
+svg_logo_path: resources/logo.svg
+image_path: resources/image.png

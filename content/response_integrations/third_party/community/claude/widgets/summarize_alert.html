@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,600,700" rel="stylesheet"/>
+  <title>Claude - Alert Triage</title>
+  <style>
+    :root {
+      --widget-bg: rgb(33, 44, 68);
+      --widget-text: rgb(255, 255, 255);
+      --widget-muted: rgb(170, 180, 200);
+      --widget-card: rgb(26, 32, 50);
+      --widget-font: 'Source Sans Pro', sans-serif;
+      --verdict-malicious: rgb(217, 83, 79);
+      --verdict-suspicious: rgb(240, 173, 78);
+      --verdict-benign: rgb(92, 184, 92);
+      --verdict-inconclusive: rgb(120, 130, 150);
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: var(--widget-bg);
+      color: var(--widget-text);
+      font: 400 14px/20px var(--widget-font);
+      padding: 16px;
+    }
+    .header { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 12px; }
+    .badge {
+      display: inline-block; padding: 2px 10px; border-radius: 12px;
+      font-weight: 600; font-size: 13px; color: #fff; background: var(--verdict-inconclusive);
+    }
+    .badge.malicious { background: var(--verdict-malicious); }
+    .badge.suspicious { background: var(--verdict-suspicious); color: #222; }
+    .badge.benign { background: var(--verdict-benign); }
+    .meta { color: var(--widget-muted); font-size: 13px; }
+    .card { background: var(--widget-card); border-radius: 6px; padding: 10px 12px; margin-bottom: 10px; }
+    .card h3 { font: 600 14px/18px var(--widget-font); margin-bottom: 6px; color: var(--widget-muted); text-transform: uppercase; letter-spacing: .04em; }
+    .card p { white-space: pre-wrap; }
+    ul { padding-left: 18px; }
+    li { margin-bottom: 4px; }
+    .empty { color: var(--widget-muted); font-style: italic; }
+    .error { color: var(--verdict-malicious); }
+  </style>
+</head>
+<body>
+  <div id="widget"></div>
+  <script>
+    // JSON placeholder [{stepInstanceName}.JsonResult]
+    const triage = [{stepInstanceName}.JsonResult];
+
+    function escapeHtml(value) {
+      return String(value === null || value === undefined ? "" : value)
+        .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+    }
+
+    function renderList(items, formatter) {
+      if (!Array.isArray(items) || items.length === 0) {
+        return '<span class="empty">None</span>';
+      }
+      return "<ul>" + items.map(item => "<li>" + escapeHtml(formatter ? formatter(item) : item) + "</li>").join("") + "</ul>";
+    }
+
+    function renderCard(title, body) {
+      return '<div class="card"><h3>' + escapeHtml(title) + "</h3>" + body + "</div>";
+    }
+
+    function render(data) {
+      const result = Array.isArray(data) ? data[0] : data;
+      if (!result || typeof result !== "object") {
+        return '<p class="error">No triage result is available.</p>';
+      }
+      const verdict = String(result.verdict || "Inconclusive");
+      const verdictClass = verdict.toLowerCase();
+      const usage = result.usage || {};
+      const header =
+        '<div class="header">' +
+        '<span class="badge ' + escapeHtml(verdictClass) + '">' + escapeHtml(verdict) + "</span>" +
+        '<span class="meta">Confidence: ' + escapeHtml(result.confidence || "n/a") + "</span>" +
+        '<span class="meta">Suggested severity: ' + escapeHtml(result.suggested_severity || "n/a") + "</span>" +
+        '<span class="meta">Model: ' + escapeHtml(result.model || "n/a") +
+        (usage.output_tokens !== undefined ? " (" + escapeHtml(usage.input_tokens) + " in / " + escapeHtml(usage.output_tokens) + " out tokens)" : "") +
+        "</span></div>";
+
+      return header +
+        renderCard("Summary", "<p>" + escapeHtml(result.summary) + "</p>") +
+        renderCard("Attack narrative", "<p>" + escapeHtml(result.attack_narrative) + "</p>") +
+        renderCard("Key findings", renderList(result.key_findings)) +
+        renderCard("MITRE ATT&CK techniques", renderList(result.mitre_attack_techniques,
+          item => (item && typeof item === "object") ? (item.technique_id + " " + item.name) : item)) +
+        renderCard("Indicators of compromise", renderList(result.indicators_of_compromise,
+          item => (item && typeof item === "object") ? (item.value + " (" + item.type + ")") : item)) +
+        renderCard("Recommended actions", renderList(result.recommended_actions)) +
+        renderCard("Open questions", renderList(result.open_questions));
+    }
+
+    document.getElementById("widget").innerHTML = render(triage);
+  </script>
+</body>
+</html>

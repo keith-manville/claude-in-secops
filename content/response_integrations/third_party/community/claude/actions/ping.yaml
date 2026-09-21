@@ -1,0 +1,7 @@
+creator: admin
+description: Test connectivity to the Claude API with the parameters provided at the integration configuration page in the Google Security Operations Marketplace tab. The action verifies the API key by retrieving the configured model.
+dynamic_results_metadata: []
+integration_identifier: Claude
+name: Ping
+parameters: []
+script_result_name: is_success

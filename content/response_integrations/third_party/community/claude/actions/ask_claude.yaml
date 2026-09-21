@@ -1,0 +1,62 @@
+creator: admin
+description: Send a prompt to Claude and return its response. Optionally provide a system prompt, constrain the response to a JSON Schema, include the current alert as context, and save the response as a case insight or comment. Alert data is passed to Claude as untrusted data inside <alert_data> tags. This action does not work with Google SecOps entities.
+dynamic_results_metadata:
+-   result_example_path: resources/ask_claude_JsonResult_example.json
+    result_name: JsonResult
+    show_result: true
+integration_identifier: Claude
+name: Ask Claude
+parameters:
+-   default_value: null
+    description: The prompt to send to Claude. Placeholders such as [Alert.Name] or [Event.field] can be used to inject case data.
+    is_mandatory: true
+    name: Prompt
+    type: content
+-   default_value: null
+    description: Optional system prompt that defines Claude's role and output style. If empty, a built-in security analyst system prompt is used.
+    is_mandatory: false
+    name: System Prompt
+    type: content
+-   default_value: null
+    description: 'Optional JSON Schema (an object with "type": "object") that constrains the response. When provided, the parsed object is returned in the JSON result under "structured_output".'
+    is_mandatory: false
+    name: JSON Schema
+    type: content
+-   default_value: false
+    description: If enabled, the current case, alert, events and entities are appended to the prompt inside <alert_data> tags.
+    is_mandatory: false
+    name: Include Alert Context
+    type: boolean
+-   default_value: false
+    description: If enabled, the response is added to the case as an insight.
+    is_mandatory: false
+    name: Create Insight
+    type: boolean
+-   default_value: false
+    description: If enabled, the response is added to the case wall as a comment.
+    is_mandatory: false
+    name: Add Comment
+    type: boolean
+-   default_value: Default
+    description: Reasoning effort for this request. "Default" uses the effort configured on the integration.
+    is_mandatory: false
+    name: Effort
+    optional_values:
+    - Default
+    - low
+    - medium
+    - high
+    - xhigh
+    - max
+    type: ddl
+-   default_value: null
+    description: Optional model ID that overrides the model configured on the integration, for example claude-sonnet-5.
+    is_mandatory: false
+    name: Model
+    type: string
+-   default_value: null
+    description: Optional maximum number of output tokens for this request (1 to 20000). Overrides the integration setting.
+    is_mandatory: false
+    name: Max Output Tokens
+    type: string
+script_result_name: is_success

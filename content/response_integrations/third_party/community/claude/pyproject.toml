@@ -1,0 +1,32 @@
+[project]
+name = "Claude"
+version = "1.0"
+description = "Claude by Anthropic is a family of frontier AI models. This integration lets Google SecOps SOAR playbooks send prompts to Claude, triage alerts, assess entities and extract indicators of compromise using the Claude API."
+requires-python = ">=3.11,<3.12"
+dependencies = [
+    "anthropic>=1.7.0,<2",
+    "environmentcommon",
+    "tipcommon",
+]
+
+[dependency-groups]
+dev = [
+    "integration-testing",
+    "pytest>=8.3.5",
+    "pytest-json-report>=1.5.0",
+    "ruff>=0.12.0",
+    "soar-sdk",
+]
+
+[tool.pytest.ini_options]
+pythonpath = "."
+
+[tool.uv.sources]
+soar-sdk = { git = "https://github.com/chronicle/soar-sdk.git" }
+tipcommon = { path = "../../../../../packages/tipcommon/whls/TIPCommon-2.4.6-py3-none-any.whl" }
+environmentcommon = { path = "../../../../../packages/envcommon/whls/EnvironmentCommon-1.0.3-py3-none-any.whl" }
+integration-testing = { path = "../../../../../packages/integration_testing_whls/integration_testing-2.4.6-py3-none-any.whl" }
+
+[[tool.uv.index]]
+url = "https://pypi.org/simple"
+default = true

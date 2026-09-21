@@ -1,0 +1,32 @@
+[
+    {
+        "Entity": "203.0.113.45",
+        "EntityResult": {
+            "verdict": "Malicious",
+            "confidence": "High",
+            "risk_score": 92,
+            "summary": "External IP address contacted by an encoded PowerShell download cradle and flagged as malicious by two enrichment sources.",
+            "reasoning": "The VirusTotal enrichment reports 14 malicious detections and the address hosts the stage2.dll payload observed in the alert events. There is no legitimate business context for this destination.",
+            "recommended_actions": [
+                "Block the IP address at the firewall and proxy",
+                "Search for other hosts that connected to it in the last 30 days"
+            ],
+            "model": "claude-opus-5"
+        }
+    },
+    {
+        "Entity": "JDOE",
+        "EntityResult": {
+            "verdict": "Suspicious",
+            "confidence": "Medium",
+            "risk_score": 55,
+            "summary": "Standard user account that opened the malicious attachment; likely a victim rather than an attacker-controlled identity.",
+            "reasoning": "The account is a regular finance user with no privileged group membership in the enrichment data. Its involvement is consistent with phishing victimization, but credentials may have been exposed.",
+            "recommended_actions": [
+                "Reset the password and revoke active sessions",
+                "Review sign-in logs for the account over the last 7 days"
+            ],
+            "model": "claude-opus-5"
+        }
+    }
+]

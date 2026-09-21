@@ -1,0 +1,18 @@
+{
+    "response": "The PowerShell command decodes a Base64 payload and downloads a second stage from 203.0.113.45. This pattern (encoded command, hidden window, bypassed execution policy) is typical of a malicious loader and should be treated as a confirmed compromise until proven otherwise.",
+    "model": "claude-opus-5",
+    "stop_reason": "end_turn",
+    "is_truncated": false,
+    "message_id": "msg_01XFDUDYJgAACzvnptvVoYEL",
+    "request_id": "req_011CRnV3q3Q4HBrfqYhSQ2Ha",
+    "usage": {
+        "input_tokens": 812,
+        "output_tokens": 96,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0
+    },
+    "structured_output": {
+        "is_malicious": true,
+        "category": "Malware loader"
+    }
+}

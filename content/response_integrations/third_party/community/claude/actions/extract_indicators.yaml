@@ -1,0 +1,42 @@
+creator: admin
+description: Extract indicators of compromise from free text with Claude, for example from an email body, a threat report or a ticket description. Claude returns normalized (de-fanged values are refanged) and deduplicated IP addresses, domains, URLs, file hashes, email addresses, file names, CVE IDs and MITRE ATT&CK technique IDs found in the text. Optionally the indicators are added to the alert as entities. The text is passed to Claude as untrusted data inside <input_text> tags. This action does not work with Google SecOps entities.
+dynamic_results_metadata:
+-   result_example_path: resources/extract_indicators_JsonResult_example.json
+    result_name: JsonResult
+    show_result: true
+integration_identifier: Claude
+name: Extract Indicators
+parameters:
+-   default_value: null
+    description: The text to extract indicators from. Placeholders such as [Event.body] can be used to inject case data.
+    is_mandatory: true
+    name: Text
+    type: content
+-   default_value: null
+    description: Optional instructions, for example internal domains to ignore.
+    is_mandatory: false
+    name: Additional Instructions
+    type: content
+-   default_value: false
+    description: If enabled, the extracted IP addresses, domains, URLs, file hashes, email addresses, file names and CVEs are added to the current alert as entities.
+    is_mandatory: false
+    name: Add Indicators As Entities
+    type: boolean
+-   default_value: false
+    description: If enabled together with "Add Indicators As Entities", the created entities are marked as suspicious.
+    is_mandatory: false
+    name: Mark Entities As Suspicious
+    type: boolean
+-   default_value: Default
+    description: Reasoning effort for this request. "Default" uses the effort configured on the integration.
+    is_mandatory: false
+    name: Effort
+    optional_values:
+    - Default
+    - low
+    - medium
+    - high
+    - xhigh
+    - max
+    type: ddl
+script_result_name: is_success
