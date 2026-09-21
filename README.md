@@ -53,19 +53,20 @@ Content Hub, test with Ping), see
    mp config --root-path "$(pwd)"
    ```
 
-2. Build and package the integration:
+2. Package the integration (this also runs the build):
 
    ```bash
-   mp build -i claude
-   mp pack -i claude
+   mp pack integration claude
    ```
+
+   The ZIP is written to `out/pack/Claude<date>.zip`.
 
 3. Upload the resulting ZIP through **Response > IDE > Import** (custom integration) in Google
    SecOps, or push it directly to an instance with `mp login` and `mp push`:
 
    ```bash
-   mp login --api-root https://{YOUR_INSTANCE}.siemplify-soar.com --api-key {YOUR_LEGACY_API_KEY}
-   mp push --type integration --name Claude
+   mp login --api-root https://{YOUR_INSTANCE}.siemplify-soar.com --api-key {YOUR_API_KEY}
+   mp push integration claude
    ```
 
    Google recommends the `mp` workflow over manual IDE uploads for integrations that depend on
