@@ -8,8 +8,12 @@ if TYPE_CHECKING:
 
 
 class IntegrationParameters(NamedTuple):
+    provider: str
     api_root: str
     api_key: str
+    gcp_project_id: str
+    gcp_region: str
+    service_account_info: SingleJson | None
     model: str
     max_output_tokens: int
     effort: str

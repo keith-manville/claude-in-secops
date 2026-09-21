@@ -12,7 +12,8 @@ if TYPE_CHECKING:
 
 
 SUCCESS_MESSAGE: str = (
-    "Successfully connected to the Claude API with the provided connection parameters! Model: {model}"
+    "Successfully connected to the Claude API with the provided connection parameters! "
+    "Provider: {provider}, model: {model}"
 )
 ERROR_MESSAGE: str = "Failed to connect to the Claude API!"
 
@@ -25,7 +26,7 @@ class Ping(ClaudeAction):
 
     def _perform_action(self, _=None) -> None:
         model_info: SingleJson = self.api_client.test_connectivity()
-        self.output_message = SUCCESS_MESSAGE.format(model=model_info["id"])
+        self.output_message = SUCCESS_MESSAGE.format(provider=model_info["provider"], model=model_info["id"])
 
 
 def main() -> NoReturn:

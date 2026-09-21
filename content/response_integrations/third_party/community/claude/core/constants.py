@@ -21,13 +21,20 @@ ASSESS_ENTITIES_SCRIPT_NAME: str = f"{INTEGRATION_IDENTIFIER} - Assess Entities"
 EXTRACT_INDICATORS_SCRIPT_NAME: str = f"{INTEGRATION_IDENTIFIER} - Extract Indicators"
 
 # Default Configuration Parameter Values
+DEFAULT_PROVIDER: str = "Anthropic API"
 DEFAULT_API_ROOT: str = "https://api.anthropic.com"
+DEFAULT_GCP_REGION: str = "global"
 DEFAULT_MODEL: str = "claude-opus-5"
 DEFAULT_MAX_OUTPUT_TOKENS: int = 8192
 DEFAULT_EFFORT: str = "high"
 DEFAULT_ADAPTIVE_THINKING: bool = True
 DEFAULT_REQUEST_TIMEOUT: int = 300
 DEFAULT_VERIFY_SSL: bool = True
+
+# Vertex AI
+CLOUD_PLATFORM_SCOPE: str = "https://www.googleapis.com/auth/cloud-platform"
+SERVICE_ACCOUNT_TYPE: str = "service_account"
+CONNECTIVITY_TEST_PROMPT: str = "ping"
 
 # Limits
 # The Anthropic SDK refuses non-streaming requests that could take longer than
@@ -64,6 +71,41 @@ class DDLEnum(Enum):
     @classmethod
     def values(cls) -> list[str]:
         return [item.value for item in cls]
+
+
+class ProviderEnum(DDLEnum):
+    ANTHROPIC = "Anthropic API"
+    VERTEX = "Vertex AI"
+
+    @classmethod
+    def from_value(cls, value: str | None) -> ProviderEnum:
+        """Parse a provider name case-insensitively, tolerating a few common spellings.
+
+        Args:
+            value: The raw provider string.
+
+        Returns:
+            The matching ProviderEnum member.
+
+        Raises:
+            ValueError: If the value is not a supported provider.
+        """
+        normalized: str = (value or "").strip().lower().replace("_", " ").replace("-", " ")
+        aliases: dict[str, ProviderEnum] = {
+            "": cls.ANTHROPIC,
+            "anthropic": cls.ANTHROPIC,
+            "anthropic api": cls.ANTHROPIC,
+            "claude api": cls.ANTHROPIC,
+            "vertex": cls.VERTEX,
+            "vertex ai": cls.VERTEX,
+            "google vertex": cls.VERTEX,
+            "google vertex ai": cls.VERTEX,
+            "gcp": cls.VERTEX,
+        }
+        try:
+            return aliases[normalized]
+        except KeyError:
+            raise ValueError(f"Unsupported provider: {value!r}. Supported values: {', '.join(cls.values())}") from None
 
 
 class EffortEnum(DDLEnum):

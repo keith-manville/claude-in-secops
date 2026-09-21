@@ -7,21 +7,24 @@ import anthropic
 from TIPCommon.base.interfaces import Apiable
 
 from .constants import (
+    CONNECTIVITY_TEST_PROMPT,
     MAX_TOKENS_STOP_REASON,
     REFUSAL_STOP_REASON,
     TEXT_BLOCK_TYPE,
     EffortEnum,
+    ProviderEnum,
 )
 from .data_models import ClaudeResponse, TokenUsage
 from .exceptions import ClaudeApiError, ClaudeRefusalError, ClaudeResponseError
 
 if TYPE_CHECKING:
-    from anthropic.types import Message, ModelInfo
+    from anthropic.types import Message, MessageTokensCount, ModelInfo
     from TIPCommon.base.interfaces.logger import ScriptLogger
     from TIPCommon.types import JSON, SingleJson
 
 
 class ApiParameters(NamedTuple):
+    provider: str
     model: str
     max_output_tokens: int
     effort: str
@@ -33,7 +36,7 @@ class ClaudeApiClient(Apiable):
 
     def __init__(
         self,
-        authenticated_session: anthropic.Anthropic,
+        authenticated_session: anthropic.Anthropic | anthropic.AnthropicVertex,
         configuration: ApiParameters,
         logger: ScriptLogger,
     ) -> None:
@@ -42,28 +45,45 @@ class ClaudeApiClient(Apiable):
             configuration=configuration,
         )
         self.logger: ScriptLogger = logger
-        self.client: anthropic.Anthropic = authenticated_session
+        self.client: anthropic.Anthropic | anthropic.AnthropicVertex = authenticated_session
+        self.provider: str = configuration.provider
         self.default_model: str = configuration.model
         self.default_max_output_tokens: int = configuration.max_output_tokens
         self.default_effort: str = configuration.effort
         self.adaptive_thinking: bool = configuration.adaptive_thinking
 
     def test_connectivity(self) -> SingleJson:
-        """Verify the API key and the configured model by retrieving the model.
+        """Verify the credentials and the configured model.
+
+        On the Anthropic API the model is retrieved through the Models API. Vertex AI has no
+        Models API, so a token count request is sent instead, which exercises the project,
+        region, credentials and model without generating output.
 
         Returns:
-            Basic information about the configured model.
+            Basic information about the configured model and provider.
 
         Raises:
-            ClaudeApiError: If the API key is invalid or the model does not exist.
+            ClaudeApiError: If the credentials are invalid or the model does not exist.
         """
         try:
+            if self.provider == ProviderEnum.VERTEX.value:
+                count: MessageTokensCount = self.client.messages.count_tokens(
+                    model=self.default_model,
+                    messages=[{"role": "user", "content": CONNECTIVITY_TEST_PROMPT}],
+                )
+                return {
+                    "id": self.default_model,
+                    "provider": self.provider,
+                    "input_tokens": count.input_tokens,
+                }
+
             model_info: ModelInfo = self.client.models.retrieve(self.default_model)
         except anthropic.APIError as error:
             raise _wrap_api_error(error) from error
 
         return {
             "id": model_info.id,
+            "provider": self.provider,
             "display_name": model_info.display_name,
             "created_at": model_info.created_at.isoformat() if model_info.created_at else None,
         }
@@ -227,7 +247,7 @@ def _wrap_api_error(error: anthropic.APIError) -> ClaudeApiError:
         elif isinstance(error, anthropic.PermissionDeniedError):
             prefix = "The API Key does not have permission to perform this request"
         elif isinstance(error, anthropic.NotFoundError):
-            prefix = "The requested resource was not found. Check the Model and API Root"
+            prefix = "The requested resource was not found. Check the Model, API Root, GCP Project ID and GCP Region"
         elif isinstance(error, anthropic.RateLimitError):
             prefix = "The Claude API rate limit was exceeded"
         elif isinstance(error, anthropic.BadRequestError):
@@ -248,6 +268,9 @@ def _wrap_api_error(error: anthropic.APIError) -> ClaudeApiError:
 
     if isinstance(error, anthropic.APIConnectionError):
         return ClaudeApiError(f"Failed to connect to the Claude API: {error}")
+
+    if isinstance(error, anthropic.CredentialsError):
+        return ClaudeApiError(f"Failed to load Google Cloud credentials for Vertex AI: {error}")
 
     return ClaudeApiError(f"Unexpected Claude API error: {error}")
 

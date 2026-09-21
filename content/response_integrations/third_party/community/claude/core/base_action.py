@@ -40,6 +40,7 @@ class ClaudeAction(Action, ABC):
         """Prepare the Claude API client from the integration configuration."""
         self.integration_params = build_auth_params(self.soar_action)
         api_params: ApiParameters = ApiParameters(
+            provider=self.integration_params.provider,
             model=self.integration_params.model,
             max_output_tokens=self.integration_params.max_output_tokens,
             effort=self.integration_params.effort,

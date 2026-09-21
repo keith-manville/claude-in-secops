@@ -25,11 +25,22 @@ always valid JSON that playbooks can branch on, for example `[Summarize Alert.Js
 
 ## Integration configuration
 
+The integration can reach Claude two ways, selected by the **Provider** parameter:
+
+- **Anthropic API** (default): direct calls to `api.anthropic.com` with an Anthropic API key.
+- **Vertex AI**: calls to Claude on Google Cloud Vertex AI, authenticated with a service account
+  key (or the execution environment's Application Default Credentials). Useful when Claude usage
+  should stay inside your Google Cloud project and billing.
+
 | Parameter | Default | Description |
 | --- | --- | --- |
-| API Root | `https://api.anthropic.com` | Base URL of the Claude API or a compatible gateway. |
-| API Key | | Anthropic API key from the [Claude Console](https://platform.claude.com). |
-| Model | `claude-opus-5` | Default model ID. Actions can override it. |
+| Provider | `Anthropic API` | `Anthropic API` or `Vertex AI`. |
+| API Root | `https://api.anthropic.com` | Anthropic API only. Base URL of the Claude API or a compatible gateway. |
+| API Key | | Anthropic API only. API key from the [Claude Console](https://platform.claude.com). |
+| GCP Project ID | | Vertex AI only. Project with the Vertex AI API enabled and Claude models available in Model Garden. |
+| GCP Region | `global` | Vertex AI only. Vertex AI location, for example `global`, `us-east5` or `europe-west1`. |
+| Service Account JSON | | Vertex AI only. Contents of a service account key file for an account with the **Vertex AI User** role. Leave empty to use Application Default Credentials. |
+| Model | `claude-opus-5` | Default model ID. Actions can override it. On Vertex AI, dated snapshots use an `@` separator, for example `claude-opus-4-5@20251101`. |
 | Max Output Tokens | `8192` | Default output token limit per request (maximum 20000). |
 | Effort | `high` | Reasoning effort (`low`, `medium`, `high`, `xhigh`, `max`, or `Default` to omit). |
 | Adaptive Thinking | `true` | Sends adaptive extended thinking. Disable for models that do not support it, such as Claude Haiku 4.5. |
@@ -37,8 +48,25 @@ always valid JSON that playbooks can branch on, for example `[Summarize Alert.Js
 | Verify SSL | `true` | Validate the API's TLS certificate. |
 
 Requests are sent through the official [`anthropic`](https://pypi.org/project/anthropic/) Python
-SDK. Refusals returned by Claude's safety classifiers fail the action with the refusal category and
-explanation in the output message.
+SDK: `anthropic.Anthropic` for the Anthropic API and `anthropic.AnthropicVertex` for Vertex AI.
+Refusals returned by Claude's safety classifiers fail the action with the refusal category and
+explanation in the output message. On Vertex AI, **Ping** sends a token count request instead of
+querying the Models API, which Vertex does not expose; it still exercises the project, region,
+credentials and model.
+
+### Setting up Vertex AI
+
+1. In the Google Cloud console, enable the **Vertex AI API** in the project.
+2. In **Vertex AI > Model Garden**, open the Claude model you want to use and click **Enable**.
+3. Create a service account with the **Vertex AI User** (`roles/aiplatform.user`) role and create a
+   JSON key for it.
+4. In the integration configuration set **Provider** to `Vertex AI`, fill in **GCP Project ID**,
+   **GCP Region** and paste the key file contents into **Service Account JSON**.
+5. Set **Model** to the ID shown in Model Garden and run **Ping**.
+
+The SecOps execution environment (or remote agent) needs outbound HTTPS access to
+`aiplatform.googleapis.com` (or the regional `<region>-aiplatform.googleapis.com` endpoint) and to
+`oauth2.googleapis.com` for token exchange.
 
 ## Installing in Google SecOps
 

@@ -7,7 +7,7 @@ from integration_testing.common import use_live_api
 from soar_sdk.SiemplifyBase import SiemplifyBase
 
 from claude.core import auth
-from claude.tests.core.product import ClaudeMockApi, SoarMockPlatform
+from claude.tests.core.product import ClaudeMockApi, FakeGoogleCredentials, SoarMockPlatform
 from claude.tests.core.session import SoarMockSession
 
 pytest_plugins = ("integration_testing.conftest",)
@@ -29,6 +29,16 @@ def claude_transport(monkeypatch: pytest.MonkeyPatch, claude_api: ClaudeMockApi)
         return anthropic.DefaultHttpxClient(transport=httpx2.MockTransport(claude_api.handle))
 
     monkeypatch.setattr(auth, "build_http_client", build_http_client)
+
+
+@pytest.fixture(autouse=True)
+def vertex_credentials(monkeypatch: pytest.MonkeyPatch) -> FakeGoogleCredentials:
+    """Replace Google service account credentials so Vertex tests never call the token endpoint."""
+    credentials: FakeGoogleCredentials = FakeGoogleCredentials()
+    if not use_live_api():
+        monkeypatch.setattr(auth, "build_vertex_credentials", lambda _info: credentials)
+
+    return credentials
 
 
 @pytest.fixture

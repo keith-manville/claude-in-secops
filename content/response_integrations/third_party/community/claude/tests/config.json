@@ -1,6 +1,10 @@
 {
+    "Provider": "Anthropic API",
     "API Root": "https://api.anthropic.com",
     "API Key": "sk-ant-test-key",
+    "GCP Project ID": "",
+    "GCP Region": "global",
+    "Service Account JSON": "",
     "Model": "claude-opus-5",
     "Max Output Tokens": 8192,
     "Effort": "high",

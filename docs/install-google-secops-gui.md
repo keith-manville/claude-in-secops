@@ -14,11 +14,19 @@ You need:
 - **A Google SecOps SOAR instance** where your user can open **Response > IDE** and configure
   integrations. Custom integration import requires the permissions of an administrator or an
   equivalent custom role.
-- **An Anthropic API key.** Create one in the [Claude Console](https://platform.claude.com) under
-  API keys. The key is only ever stored in the integration configuration, which SecOps keeps as a
-  password field.
-- **Outbound HTTPS access** from the SecOps execution environment to `api.anthropic.com` on port
-  443. If your actions run on a remote agent, the agent host needs that access instead.
+- **Credentials for one of the two providers:**
+  - *Anthropic API*: an API key created in the [Claude Console](https://platform.claude.com) under
+    API keys.
+  - *Vertex AI*: a Google Cloud project with the Vertex AI API enabled, the Claude model enabled
+    in **Vertex AI > Model Garden**, and a JSON key for a service account that has the
+    **Vertex AI User** role. If the SecOps execution environment already runs with Application
+    Default Credentials that can call Vertex AI, the key file is optional.
+
+  Secrets are only ever stored in the integration configuration, which SecOps keeps as password
+  fields.
+- **Outbound HTTPS access** from the SecOps execution environment (or the remote agent that runs
+  the actions) to `api.anthropic.com` for the Anthropic API, or to `aiplatform.googleapis.com`
+  (or `<region>-aiplatform.googleapis.com`) and `oauth2.googleapis.com` for Vertex AI.
 - **The integration package**, a ZIP file named like `Claude20260921.zip`. Either download it from
   your team's release location or build it yourself as described in the next section.
 
@@ -73,9 +81,13 @@ integration again replaces the previous version.
 
    | Parameter | Value |
    | --- | --- |
-   | API Root | Leave as `https://api.anthropic.com` unless you route traffic through a gateway that exposes the Anthropic Messages API. |
-   | API Key | Your Anthropic API key. |
-   | Model | The default model ID for all actions, for example `claude-opus-5`. Individual playbook steps can override it. |
+   | Provider | `Anthropic API` or `Vertex AI`. |
+   | API Root | Anthropic API only. Leave as `https://api.anthropic.com` unless you route traffic through a gateway that exposes the Anthropic Messages API. |
+   | API Key | Anthropic API only. Your Anthropic API key. |
+   | GCP Project ID | Vertex AI only. The Google Cloud project ID. |
+   | GCP Region | Vertex AI only. `global` is recommended; regional values such as `us-east5` also work. |
+   | Service Account JSON | Vertex AI only. Paste the full contents of the service account key file. Leave empty to use Application Default Credentials. |
+   | Model | The default model ID for all actions, for example `claude-opus-5`. On Vertex AI use the ID shown in Model Garden; dated snapshots use an `@` separator, for example `claude-opus-4-5@20251101`. Individual playbook steps can override it. |
    | Max Output Tokens | Default `8192`. The largest response Claude may generate per request. Values above `20000` are rejected. |
    | Effort | Default `high`. One of `low`, `medium`, `high`, `xhigh`, `max`, or `Default` to let the model decide. Lower values are faster and cheaper. |
    | Adaptive Thinking | Leave enabled. Disable only for models that do not support adaptive thinking, such as Claude Haiku 4.5. |
@@ -84,8 +96,10 @@ integration again replaces the previous version.
    | Run Remotely | Enable only if this instance should execute on a remote agent. |
 
 5. Click **Save**, then **Test**. The test runs the **Ping** action with the saved
-   configuration. A green check mark means SecOps authenticated with the API key and retrieved
-   the configured model. A red X shows the error message. See [Troubleshooting](#troubleshooting).
+   configuration. On the Anthropic API it retrieves the configured model; on Vertex AI it sends a
+   token count request, which validates the project, region, credentials and model without
+   generating output. A green check mark means the call succeeded. A red X shows the error
+   message. See [Troubleshooting](#troubleshooting).
 
 ## Step 4: Verify with a manual action
 
@@ -132,7 +146,10 @@ only changed when you import a new package yourself.
 | Symptom | Cause and fix |
 | --- | --- |
 | **Test** shows a red X with `Authentication with the Claude API failed (HTTP 401)` | The API key is wrong, revoked or from a different organization. Paste a new key from the Claude Console and save again. |
-| `The requested resource was not found (HTTP 404)` | The **Model** value is not a valid model ID, or the **API Root** points to the wrong service. Check the ID against the Claude Console. |
+| `The requested resource was not found (HTTP 404)` | The **Model** value is not a valid model ID, the **API Root** points to the wrong service, or on Vertex AI the model is not enabled in Model Garden for that project and region. |
+| `"GCP Project ID" must be provided when "Provider" is "Vertex AI"` | Fill in the project ID, or switch **Provider** back to `Anthropic API`. |
+| `"Service Account JSON" is not valid JSON` or `must be the contents of a service account key file` | Paste the entire key file downloaded from the Google Cloud console (it starts with `{"type": "service_account"`), not the client email or a user credential file. |
+| `The API Key does not have permission to perform this request (HTTP 403)` on Vertex AI | The service account lacks the **Vertex AI User** role, or the Vertex AI API is not enabled in the project. |
 | `The request to the Claude API timed out` | Raise **Request Timeout** and the playbook step timeout, or lower **Max Output Tokens** and **Effort**. |
 | `Failed to connect to the Claude API` | The execution environment cannot reach `api.anthropic.com:443`. Check firewall and proxy rules; for remote agents, check the agent host. |
 | `The Claude API rate limit was exceeded (HTTP 429)` | The organization's rate limit was hit. The SDK retries twice automatically; spread out playbook runs or raise the limit in the Claude Console. |

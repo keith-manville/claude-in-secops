@@ -5,3 +5,9 @@
   publish_time: '2026-09-21'
   ticket_number: ''
   new: true
+- description: Added the Provider parameter with support for Claude on Vertex AI using a GCP project, region and service account JSON. Ping validates Vertex AI access with a token count request.
+  version: 2.0
+  item_name: Claude
+  item_type: Integration
+  publish_time: '2026-09-21'
+  ticket_number: ''

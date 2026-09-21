@@ -10,7 +10,7 @@ from typing import TYPE_CHECKING, Any
 
 import httpx2
 
-from ..common import MOCK_MODEL_ID, MOCK_REQUEST_ID
+from ..common import MOCK_MODEL_ID, MOCK_REQUEST_ID, MOCK_VERTEX_PROJECT, MOCK_VERTEX_REGION
 from .mock_data import MOCK_ALERT, MOCK_CASE_METADATA
 
 if TYPE_CHECKING:
@@ -38,12 +38,33 @@ class MockApiError:
 
 
 @dataclasses.dataclass(slots=True)
+class FakeGoogleCredentials:
+    """Stand-in for google.auth credentials that never talks to the token endpoint."""
+
+    token: str = "fake-vertex-access-token"
+    expired: bool = False
+
+    def refresh(self, _request: Any) -> None:  # noqa: ANN401
+        self.expired = False
+
+
+@dataclasses.dataclass(slots=True)
 class ClaudeMockApi:
-    """A mock of the Anthropic Messages and Models APIs served through an httpx2 MockTransport."""
+    """A mock of the Anthropic API and of Claude on Vertex AI served through an httpx2 MockTransport.
+
+    Anthropic API routes: GET /v1/models/{id}, POST /v1/messages.
+    Vertex AI routes: POST /v1/projects/{p}/locations/{r}/publishers/anthropic/models/{model}:rawPredict
+    and the count-tokens variant.
+    """
 
     model_id: str = MOCK_MODEL_ID
+    vertex_project: str = MOCK_VERTEX_PROJECT
+    vertex_region: str = MOCK_VERTEX_REGION
     requests: list[SingleJson] = dataclasses.field(default_factory=list)
     model_requests: list[str] = dataclasses.field(default_factory=list)
+    count_token_requests: list[SingleJson] = dataclasses.field(default_factory=list)
+    request_headers: list[dict[str, str]] = dataclasses.field(default_factory=list)
+    request_paths: list[str] = dataclasses.field(default_factory=list)
     _responses: deque[MockMessage] = dataclasses.field(default_factory=deque)
     _errors: deque[MockApiError] = dataclasses.field(default_factory=deque)
     _fail_all: MockApiError | None = None
@@ -95,11 +116,36 @@ class ClaudeMockApi:
             )
 
         path: str = request.url.path
+        self.request_paths.append(path)
+        self.request_headers.append(dict(request.headers))
         if request.method == "GET" and path.startswith("/v1/models/"):
             return self._handle_get_model(request, path.rsplit("/", maxsplit=1)[-1])
 
         if request.method == "POST" and path == "/v1/messages":
             return self._handle_create_message(request)
+
+        vertex_prefix: str = (
+            f"/v1/projects/{self.vertex_project}/locations/{self.vertex_region}/publishers/anthropic/models/"
+        )
+        if request.method == "POST" and path.startswith(vertex_prefix):
+            model_and_action: str = path[len(vertex_prefix) :]
+            model, _, action = model_and_action.partition(":")
+            if model == "count-tokens" and action == "rawPredict":
+                return self._handle_count_tokens(request)
+            if action == "rawPredict":
+                if model != self.model_id:
+                    return httpx2.Response(
+                        404,
+                        json={
+                            "error": {
+                                "code": 404,
+                                "message": f"Publisher Model `{model}` not found",
+                                "status": "NOT_FOUND",
+                            }
+                        },
+                        request=request,
+                    )
+                return self._handle_create_message(request, model=model)
 
         return httpx2.Response(
             404,
@@ -129,7 +175,12 @@ class ClaudeMockApi:
             request=request,
         )
 
-    def _handle_create_message(self, request: httpx2.Request) -> httpx2.Response:
+    def _handle_count_tokens(self, request: httpx2.Request) -> httpx2.Response:
+        body: SingleJson = json.loads(request.read())
+        self.count_token_requests.append(body)
+        return httpx2.Response(200, json={"input_tokens": 7}, headers={"request-id": MOCK_REQUEST_ID}, request=request)
+
+    def _handle_create_message(self, request: httpx2.Request, model: str | None = None) -> httpx2.Response:
         body: SingleJson = json.loads(request.read())
         self.requests.append(body)
         spec: MockMessage = self._responses.popleft() if self._responses else MockMessage()
@@ -138,7 +189,7 @@ class ClaudeMockApi:
             "id": f"msg_{len(self.requests):03d}",
             "type": "message",
             "role": "assistant",
-            "model": spec.model or body["model"],
+            "model": spec.model or model or body["model"],
             "content": [{"type": "text", "text": text}] if text else [],
             "stop_reason": spec.stop_reason,
             "stop_sequence": None,

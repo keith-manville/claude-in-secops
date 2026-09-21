@@ -23,7 +23,8 @@ class TestPing:
         assert action_output.results.execution_state == ExecutionState.COMPLETED
         assert action_output.results.result_value is True
         assert action_output.results.output_message == (
-            f"Successfully connected to the Claude API with the provided connection parameters! Model: {MOCK_MODEL_ID}"
+            "Successfully connected to the Claude API with the provided connection parameters! "
+            f"Provider: Anthropic API, model: {MOCK_MODEL_ID}"
         )
 
     @set_metadata(integration_config_file_path=CONFIG_PATH)
@@ -52,7 +53,7 @@ class TestPing:
         ping.main()
 
         assert action_output.results.execution_state == ExecutionState.FAILED
-        assert "API Key" in action_output.results.output_message
+        assert '"API Key" must be provided when "Provider" is "Anthropic API"' in action_output.results.output_message
 
     @set_metadata(
         integration_config_file_path=CONFIG_PATH,

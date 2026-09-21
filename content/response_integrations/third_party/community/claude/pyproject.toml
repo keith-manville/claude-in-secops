@@ -1,10 +1,10 @@
 [project]
 name = "Claude"
-version = "1.0"
-description = "Claude by Anthropic is a family of frontier AI models. This integration lets Google SecOps SOAR playbooks send prompts to Claude, triage alerts, assess entities and extract indicators of compromise using the Claude API."
+version = "2.0"
+description = "Claude by Anthropic is a family of frontier AI models. This integration lets Google SecOps SOAR playbooks send prompts to Claude, triage alerts, assess entities and extract indicators of compromise through the Claude API or through Claude on Vertex AI."
 requires-python = ">=3.11,<3.12"
 dependencies = [
-    "anthropic>=1.7.0,<2",
+    "anthropic[vertex]>=1.7.0,<2",
     "environmentcommon",
     "tipcommon",
 ]

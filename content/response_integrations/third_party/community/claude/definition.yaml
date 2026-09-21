@@ -1,23 +1,47 @@
 identifier: Claude
 name: Claude
-description: Claude by Anthropic is a family of frontier AI models. This integration lets Google SecOps SOAR playbooks send prompts to Claude, triage alerts, assess entities and extract indicators of compromise using the Claude API.
+description: Claude by Anthropic is a family of frontier AI models. This integration lets Google SecOps SOAR playbooks send prompts to Claude, triage alerts, assess entities and extract indicators of compromise through the Claude API or through Claude on Vertex AI.
 parameters:
+-   name: Provider
+    default_value: Anthropic API
+    type: string
+    description: 'Where requests are sent. "Anthropic API" uses the API Root and API Key parameters. "Vertex AI" uses Claude on Google Cloud Vertex AI with the GCP Project ID, GCP Region and Service Account JSON parameters.'
+    is_mandatory: true
+    integration_identifier: Claude
 -   name: API Root
     default_value: https://api.anthropic.com
     type: string
-    description: Base URL of the Claude API. Keep the default unless you route requests through a gateway or proxy that exposes the Anthropic Messages API.
+    description: Anthropic API only. Base URL of the Claude API. Keep the default unless you route requests through a gateway or proxy that exposes the Anthropic Messages API.
     is_mandatory: true
     integration_identifier: Claude
 -   name: API Key
     default_value: null
     type: password
-    description: Anthropic API key used to authenticate requests. Create one in the Claude Console (https://platform.claude.com).
-    is_mandatory: true
+    description: Anthropic API only. API key used to authenticate requests. Create one in the Claude Console (https://platform.claude.com). Required when Provider is "Anthropic API".
+    is_mandatory: false
+    integration_identifier: Claude
+-   name: GCP Project ID
+    default_value: null
+    type: string
+    description: Vertex AI only. ID of the Google Cloud project where the Vertex AI API is enabled and Claude models are available in Model Garden. Required when Provider is "Vertex AI".
+    is_mandatory: false
+    integration_identifier: Claude
+-   name: GCP Region
+    default_value: global
+    type: string
+    description: Vertex AI only. Vertex AI location to send requests to, for example global, us-east5 or europe-west1. The global endpoint is recommended.
+    is_mandatory: false
+    integration_identifier: Claude
+-   name: Service Account JSON
+    default_value: null
+    type: password
+    description: Vertex AI only. Contents of a service account key file (JSON) for a service account with the Vertex AI User role. If empty, the Application Default Credentials of the SOAR execution environment are used.
+    is_mandatory: false
     integration_identifier: Claude
 -   name: Model
     default_value: claude-opus-5
     type: string
-    description: Default Claude model ID used by all actions, for example claude-opus-5 or claude-sonnet-5. Individual actions can override it.
+    description: Default Claude model ID used by all actions, for example claude-opus-5 or claude-sonnet-5. On Vertex AI use the model ID shown in Model Garden; dated snapshots use an @ separator, for example claude-opus-4-5@20251101. Individual actions can override it.
     is_mandatory: true
     integration_identifier: Claude
 -   name: Max Output Tokens
