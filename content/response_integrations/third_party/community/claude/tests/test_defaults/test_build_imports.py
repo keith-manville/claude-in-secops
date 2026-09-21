@@ -23,7 +23,9 @@ def _python_files(directory: pathlib.Path) -> list[pathlib.Path]:
 
 def test_core_has_no_subpackages() -> None:
     core: pathlib.Path = common.INTEGRATION_PATH / "core"
-    subpackages: list[str] = [str(path.relative_to(core)) for path in core.iterdir() if path.is_dir()]
+    subpackages: list[str] = [
+        str(path.relative_to(core)) for path in core.iterdir() if path.is_dir() and not path.name.startswith("__")
+    ]
     assert subpackages == [], f"core/ must stay flat, found subpackages: {subpackages}"
 
 
