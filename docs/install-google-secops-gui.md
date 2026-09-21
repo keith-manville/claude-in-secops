@@ -19,8 +19,10 @@ You need:
     API keys.
   - *Vertex AI*: a Google Cloud project with the Vertex AI API enabled, the Claude model enabled
     in **Vertex AI > Model Garden**, and a JSON key for a service account that has the
-    **Vertex AI User** role. If the SecOps execution environment already runs with Application
-    Default Credentials that can call Vertex AI, the key file is optional.
+    **Vertex AI User** role (or only the `aiplatform.endpoints.predict` permission). See
+    [vertex-ai-service-account.md](vertex-ai-service-account.md) for the `gcloud` commands. If
+    the SecOps execution environment already runs with Application Default Credentials that can
+    call Vertex AI, the key file is optional.
 
   Secrets are only ever stored in the integration configuration, which SecOps keeps as password
   fields.

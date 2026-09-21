@@ -58,8 +58,10 @@ credentials and model.
 
 1. In the Google Cloud console, enable the **Vertex AI API** in the project.
 2. In **Vertex AI > Model Garden**, open the Claude model you want to use and click **Enable**.
-3. Create a service account with the **Vertex AI User** (`roles/aiplatform.user`) role and create a
-   JSON key for it.
+3. Create a service account with the **Vertex AI User** (`roles/aiplatform.user`) role, or a
+   custom role containing only `aiplatform.endpoints.predict`, and create a JSON key for it.
+   [docs/vertex-ai-service-account.md](docs/vertex-ai-service-account.md) has the exact `gcloud`
+   commands, the roles each step needs, and a `curl` test that mirrors the Ping action.
 4. In the integration configuration set **Provider** to `Vertex AI`, fill in **GCP Project ID**,
    **GCP Region** and paste the key file contents into **Service Account JSON**.
 5. Set **Model** to the ID shown in Model Garden and run **Ping**.
