@@ -97,6 +97,10 @@ mp test -i claude
 mp check content/response_integrations/third_party/community/claude
 ```
 
+`mp build` flattens `core/` into a single `Managers/` directory and rewrites relative imports, so
+every relative import must point at one module directly inside `core/` or `actions/`. The test
+`tests/test_defaults/test_build_imports.py` enforces that layout.
+
 Tests never call the Claude API. The Anthropic SDK is pointed at an in-memory mock through an
 `httpx2.MockTransport`, and the SOAR SDK session is routed to a mock platform that records the
 insights, comments and entity updates each action produces.

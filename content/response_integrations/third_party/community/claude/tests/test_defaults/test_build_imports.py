@@ -44,9 +44,8 @@ def test_relative_imports_survive_flattening() -> None:
                     parts = parts[1:]
 
                 if len(parts) != 1 or parts[0] not in flat_modules:
-                    problems.append(
-                        f"{path.relative_to(common.INTEGRATION_PATH)}:{node.lineno}: from {'.' * node.level}{node.module} import ..."
-                    )
+                    location: str = f"{path.relative_to(common.INTEGRATION_PATH)}:{node.lineno}"
+                    problems.append(f"{location}: from {'.' * node.level}{node.module} import ...")
 
     assert problems == [], "Relative imports must point at a single module inside core/ or actions/:\n" + "\n".join(
         problems
