@@ -42,6 +42,10 @@ explanation in the output message.
 
 ## Installing in Google SecOps
 
+For a click-through walkthrough of the SecOps web console (import in the IDE, configure in the
+Content Hub, test with Ping), see
+[docs/install-google-secops-gui.md](docs/install-google-secops-gui.md).
+
 1. Install `uv` and the Content Hub `mp` CLI:
 
    ```bash
