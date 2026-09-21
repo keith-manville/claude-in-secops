@@ -3,9 +3,6 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 import anthropic
-from soar_sdk.SiemplifyAction import SiemplifyAction
-from soar_sdk.SiemplifyConnectors import SiemplifyConnectorExecution
-from soar_sdk.SiemplifyJob import SiemplifyJob
 from TIPCommon.extraction import extract_script_param
 
 from .constants import (
@@ -28,6 +25,11 @@ from .exceptions import ClaudeIntegrationError, ClaudeInvalidParameterError
 if TYPE_CHECKING:
     from TIPCommon.types import ChronicleSOAR, SingleJson
 
+# Class names of the SOAR SDK objects that can carry the integration configuration.
+# Compared by name so this manager module does not import from the SDK.
+ACTION_SDK_CLASS: str = "SiemplifyAction"
+PARAMETER_BASED_SDK_CLASSES: frozenset[str] = frozenset({"SiemplifyConnectorExecution", "SiemplifyJob"})
+
 
 def build_auth_params(soar_sdk_object: ChronicleSOAR) -> IntegrationParameters:
     """Extract the integration configuration parameters from the SOAR SDK object.
@@ -43,9 +45,9 @@ def build_auth_params(soar_sdk_object: ChronicleSOAR) -> IntegrationParameters:
     """
     sdk_class: str = type(soar_sdk_object).__name__
     input_dictionary: SingleJson
-    if sdk_class == SiemplifyAction.__name__:
+    if sdk_class == ACTION_SDK_CLASS:
         input_dictionary = soar_sdk_object.get_configuration(INTEGRATION_IDENTIFIER)
-    elif sdk_class in (SiemplifyConnectorExecution.__name__, SiemplifyJob.__name__):
+    elif sdk_class in PARAMETER_BASED_SDK_CLASSES:
         input_dictionary = soar_sdk_object.parameters
     else:
         raise ClaudeIntegrationError(f"Provided SOAR instance is not supported! type: {sdk_class}.")

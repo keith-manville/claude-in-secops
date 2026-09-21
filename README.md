@@ -57,9 +57,25 @@ explanation in the output message.
    ```
 
 3. Upload the resulting ZIP through **Response > IDE > Import** (custom integration) in Google
-   SecOps, or push it directly to a development instance with `mp login` and `mp push`.
+   SecOps, or push it directly to an instance with `mp login` and `mp push`:
 
-4. Configure an instance of the **Claude** integration in the Marketplace tab and run **Ping**.
+   ```bash
+   mp login --api-root https://{YOUR_INSTANCE}.siemplify-soar.com --api-key {YOUR_LEGACY_API_KEY}
+   mp push --type integration --name Claude
+   ```
+
+   Google recommends the `mp` workflow over manual IDE uploads for integrations that depend on
+   TIPCommon, because `mp` packages the nested dependency tree automatically. Every dependency of
+   this integration resolves to a pure-Python or `manylinux_2_17_x86_64` wheel, which is what the
+   platform's dependency resolver requires.
+
+4. Configure an instance of the **Claude** integration in the Content Hub tab and run **Ping**.
+   Ping only uses the integration configuration, which is what the Content Hub **Test** button
+   exercises.
+
+To keep a private copy instead of contributing it upstream, place the directory under
+`content/response_integrations/custom/` in a Content Hub clone, which is the location Google's
+custom integration guide reserves for proprietary integrations.
 
 ## Development
 
