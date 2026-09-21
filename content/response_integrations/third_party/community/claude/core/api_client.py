@@ -6,14 +6,14 @@ from typing import TYPE_CHECKING, Any, NamedTuple
 import anthropic
 from TIPCommon.base.interfaces import Apiable
 
-from ..constants import (
+from .constants import (
     MAX_TOKENS_STOP_REASON,
     REFUSAL_STOP_REASON,
     TEXT_BLOCK_TYPE,
     EffortEnum,
 )
-from ..data_models import ClaudeResponse, TokenUsage
-from ..exceptions import ClaudeApiError, ClaudeRefusalError, ClaudeResponseError
+from .data_models import ClaudeResponse, TokenUsage
+from .exceptions import ClaudeApiError, ClaudeRefusalError, ClaudeResponseError
 
 if TYPE_CHECKING:
     from anthropic.types import Message, ModelInfo

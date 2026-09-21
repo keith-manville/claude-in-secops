@@ -8,7 +8,7 @@ from TIPCommon.base.action.data_models import CaseInsight, EntityInsight, Insigh
 from TIPCommon.extraction import extract_action_param
 from TIPCommon.validation import ParameterValidator
 
-from .api.api_client import ApiParameters, ClaudeApiClient
+from .api_client import ApiParameters, ClaudeApiClient
 from .auth import build_auth_params, create_client
 from .constants import (
     INSIGHT_TRIGGERED_BY,
