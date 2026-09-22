@@ -1,10 +1,10 @@
-title: Claude - Alert Triage
+title: Claude - Ask Claude
 type: html
 scope: alert
-action_identifier: Summarize Alert
-description: Shows the verdict, severity, narrative, findings, MITRE ATT&CK techniques, indicators and recommended actions produced by the Summarize Alert action. Output only, styled after the Claude Code terminal interface.
+action_identifier: Ask Claude
+description: Shows the prompt and Claude's response, rendered like the Claude Code terminal. Output only, styled after the Claude Code terminal interface.
 data_definition:
-    html_height: 520
+    html_height: 420
     safe_rendering: false
     widget_definition_scope: both
     type: html

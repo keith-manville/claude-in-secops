@@ -62,7 +62,7 @@ dependencies), so the SecOps platform does not need to download anything at inst
    - **Python dependencies**, listing the bundled wheels.
    - **Integration parameters** (API Root, API Key, Model, and so on).
    - Five actions: **Ping**, **Ask Claude**, **Summarize Alert**, **Assess Entities** and
-     **Extract Indicators**, plus the **Claude - Alert Triage** widget.
+     **Extract Indicators**, plus one predefined widget per action after Ping.
 5. Make sure the **Enable/Disable** toggle for the integration is set to **ON**, then click
    **Save**.
 
@@ -127,8 +127,10 @@ Add a **Claude** step to a playbook like any other integration action. Useful pa
 - **Ask Claude** with a JSON Schema when a later step needs a specific structure; the parsed
   object is returned under `JsonResult.structured_output`.
 
-To show the triage summary in the alert view, add the **Claude - Alert Triage** widget to the
-playbook step for **Summarize Alert** through the step's widget settings.
+Each action has a predefined, output-only widget styled after the Claude Code terminal: **Claude -
+Ask Claude**, **Claude - Alert Triage**, **Claude - Entity Assessments** and **Claude - Extracted
+Indicators**. To show one in the alert view, open the playbook's **View**, add the widget for the
+Claude step, and save. It renders as soon as the step has run and updates on every run.
 
 Set the playbook step timeout higher than the integration's **Request Timeout**. Actions that
 call Claude once per entity, such as **Assess Entities**, need proportionally more time.

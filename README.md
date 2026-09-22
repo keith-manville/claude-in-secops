@@ -14,9 +14,28 @@ The integration lives in
 | --- | --- |
 | **Ping** | Verifies the API key and the configured model by retrieving the model from the Claude API. |
 | **Ask Claude** | Sends a prompt (and optional system prompt) to Claude and returns the response. Can constrain the answer to a JSON Schema, append the current alert as context, and save the answer as a case insight or comment. |
-| **Summarize Alert** | Sends the case, alert, security events and entities to Claude and returns a structured triage: verdict, confidence, suggested severity, attack narrative, key findings, MITRE ATT&CK techniques, indicators and recommended actions. Creates an insight and comes with a predefined widget. |
+| **Summarize Alert** | Sends the case, alert, security events and entities to Claude and returns a structured triage: verdict, confidence, suggested severity, attack narrative, key findings, MITRE ATT&CK techniques, indicators and recommended actions. Creates an insight. |
 | **Assess Entities** | Asks Claude to assess each entity in the alert scope using the enrichment already attached to it. Adds `Claude_*` enrichment fields, an entity insight, and can mark malicious entities as suspicious. |
 | **Extract Indicators** | Extracts and normalizes IP addresses, domains, URLs, hashes, email addresses, file names, CVEs and ATT&CK technique IDs from free text (email bodies, threat reports). Can add them to the alert as entities. |
+
+## Widgets
+
+Every action ships a predefined, output-only widget styled after the Claude Code terminal
+interface: a `Claude` header with the model, the prompt as a `>` line, the response as `⏺` turns
+with `⎿` detail lines, and a dim footer with token usage. They render the action's JSON result and
+never call out to Claude or SOAR themselves.
+
+| Widget | Action | Shows |
+| --- | --- | --- |
+| Claude - Ask Claude | Ask Claude | The prompt and the Markdown-rendered response, or the structured output as JSON. |
+| Claude - Alert Triage | Summarize Alert | Verdict, severity, narrative, findings, ATT&CK techniques, indicators, actions. |
+| Claude - Entity Assessments | Assess Entities | One turn per entity with verdict, risk score, summary and actions. |
+| Claude - Extracted Indicators | Extract Indicators | Indicators grouped by type with counts. |
+
+Attach a widget in the playbook designer: open the playbook's **View**, add the widget for the
+Claude step, and it appears in the alert view once the step has run. The widget HTML lives in
+`widgets/` and reads `[{stepInstanceName}.JsonResult]`, the same placeholder any custom HTML
+widget would use, so the layouts can be copied into your own views.
 
 All prompts wrap alert data, entity data and user-supplied text in XML-style tags and instruct
 Claude to treat that content as data rather than instructions, which limits prompt injection

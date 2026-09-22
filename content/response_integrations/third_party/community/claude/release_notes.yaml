@@ -11,3 +11,9 @@
   item_type: Integration
   publish_time: '2026-09-21'
   ticket_number: ''
+- description: Added output-only widgets styled after the Claude Code terminal interface for the Ask Claude, Summarize Alert, Assess Entities and Extract Indicators actions. Ask Claude now includes a prompt preview in its JSON result.
+  version: 2.1
+  item_name: Claude
+  item_type: Integration
+  publish_time: '2026-09-22'
+  ticket_number: ''

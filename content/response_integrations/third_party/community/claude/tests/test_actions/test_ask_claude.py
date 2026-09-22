@@ -52,6 +52,7 @@ def test_ask_claude_success(action_output: MockActionOutput, claude_api: ClaudeM
     assert result["is_truncated"] is False
     assert result["request_id"] == MOCK_REQUEST_ID
     assert result["usage"]["output_tokens"] == 45
+    assert result["prompt_preview"] == PROMPT
     assert "structured_output" not in result
 
 

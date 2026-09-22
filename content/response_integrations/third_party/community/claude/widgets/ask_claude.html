@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8"/>
   <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-  <title>Claude - Alert Triage</title>
+  <title>Claude - Ask Claude</title>
   <style>
     :root {
       --bg: #0f0f12; --panel: #16161b; --border: #2a2a33; --text: #e8e6e3; --dim: #8a8f98;
@@ -153,27 +153,18 @@
 
     function render(result) {
       if (!result || typeof result !== "object" || Array.isArray(result)) {
-        return header("") + '<p class="err">No triage result is available.</p>';
+        return header("") + '<p class="err">No response is available.</p>';
       }
-      const verdict = result.verdict || "Inconclusive";
       let html = header(result.model || "");
-      html += userTurn("Triage this alert");
-      html += assistantTurn(
-        '<span class="label">Verdict</span> <span class="' + verdictClass(verdict) + '">' + esc(verdict) + "</span>" +
-        ' <span class="dim">(' + esc(result.confidence || "n/a") + " confidence)</span>" +
-        '  <span class="label">Suggested severity</span> ' + esc(result.suggested_severity || "n/a")
-      );
-      if (result.summary) html += subLine('<span class="label">Summary</span> ' + esc(result.summary));
-      if (result.attack_narrative) html += subLine('<span class="label">Attack narrative</span> ' + esc(result.attack_narrative));
-      html += subLine('<span class="label">Key findings</span>' + plainList(result.key_findings));
-      const techniques = (result.mitre_attack_techniques || []).map((t) => (t && typeof t === "object") ? (t.technique_id + " " + t.name) : t);
-      html += subLine('<span class="label">MITRE ATT&amp;CK</span>' + plainList(techniques));
-      const iocs = (result.indicators_of_compromise || []).map((i) => (i && typeof i === "object") ? (i.value + " (" + i.type + ")") : i);
-      html += subLine('<span class="label">Indicators</span>' + plainList(iocs));
-      html += subLine('<span class="label">Recommended actions</span>' + plainList(result.recommended_actions, true));
-      if (Array.isArray(result.open_questions) && result.open_questions.length) {
-        html += subLine('<span class="label">Open questions</span>' + plainList(result.open_questions));
+      if (result.prompt_preview) html += userTurn(result.prompt_preview);
+      let body;
+      if (result.structured_output !== undefined && result.structured_output !== null) {
+        body = '<div class="md"><pre><code>' + esc(JSON.stringify(result.structured_output, null, 2)) + "</code></pre></div>";
+      } else {
+        body = renderMarkdown(result.response || "");
       }
+      html += assistantTurn(body);
+      if (result.is_truncated) html += subLine('<span class="warn">&#9888; response cut off by the max output tokens limit</span>');
       html += footer(result);
       return html;
     }

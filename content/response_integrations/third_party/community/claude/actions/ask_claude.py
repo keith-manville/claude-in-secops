@@ -27,6 +27,7 @@ if TYPE_CHECKING:
 
 
 INSIGHT_TITLE: str = "Claude Response"
+PROMPT_PREVIEW_CHARS: int = 1_000
 SUCCESS_MESSAGE: str = "Successfully received a response from Claude. Model: {model}, output tokens: {tokens}."
 TRUNCATED_SUFFIX: str = " Note: the response was cut off by the max output tokens limit."
 
@@ -116,7 +117,10 @@ class AskClaude(ClaudeAction):
             effort=self.params.effort,
             json_schema=self.params.json_schema,
         )
-        self.json_results = response.to_json()
+        self.json_results = {
+            **response.to_json(),
+            "prompt_preview": truncate_text(self.params.prompt.strip(), PROMPT_PREVIEW_CHARS),
+        }
 
         display_text: str = (
             json.dumps(response.structured_output, indent=2, ensure_ascii=False)

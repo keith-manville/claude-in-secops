@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8"/>
   <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-  <title>Claude - Alert Triage</title>
+  <title>Claude - Entity Assessments</title>
   <style>
     :root {
       --bg: #0f0f12; --panel: #16161b; --border: #2a2a33; --text: #e8e6e3; --dim: #8a8f98;
@@ -151,30 +151,31 @@
     }
 
 
-    function render(result) {
-      if (!result || typeof result !== "object" || Array.isArray(result)) {
-        return header("") + '<p class="err">No triage result is available.</p>';
+    function render(results) {
+      if (!Array.isArray(results) || results.length === 0) {
+        return header("") + '<p class="err">No entity assessments are available.</p>';
       }
-      const verdict = result.verdict || "Inconclusive";
-      let html = header(result.model || "");
-      html += userTurn("Triage this alert");
-      html += assistantTurn(
-        '<span class="label">Verdict</span> <span class="' + verdictClass(verdict) + '">' + esc(verdict) + "</span>" +
-        ' <span class="dim">(' + esc(result.confidence || "n/a") + " confidence)</span>" +
-        '  <span class="label">Suggested severity</span> ' + esc(result.suggested_severity || "n/a")
-      );
-      if (result.summary) html += subLine('<span class="label">Summary</span> ' + esc(result.summary));
-      if (result.attack_narrative) html += subLine('<span class="label">Attack narrative</span> ' + esc(result.attack_narrative));
-      html += subLine('<span class="label">Key findings</span>' + plainList(result.key_findings));
-      const techniques = (result.mitre_attack_techniques || []).map((t) => (t && typeof t === "object") ? (t.technique_id + " " + t.name) : t);
-      html += subLine('<span class="label">MITRE ATT&amp;CK</span>' + plainList(techniques));
-      const iocs = (result.indicators_of_compromise || []).map((i) => (i && typeof i === "object") ? (i.value + " (" + i.type + ")") : i);
-      html += subLine('<span class="label">Indicators</span>' + plainList(iocs));
-      html += subLine('<span class="label">Recommended actions</span>' + plainList(result.recommended_actions, true));
-      if (Array.isArray(result.open_questions) && result.open_questions.length) {
-        html += subLine('<span class="label">Open questions</span>' + plainList(result.open_questions));
+      const first = results.find((r) => r && r.EntityResult && r.EntityResult.model);
+      let html = header(first ? first.EntityResult.model : "");
+      html += userTurn("Assess " + results.length + (results.length === 1 ? " entity" : " entities"));
+      for (const item of results) {
+        const entity = esc(item.Entity);
+        const r = item.EntityResult || {};
+        if (r.execution_status !== undefined && r.verdict === undefined) {
+          html += assistantTurn(entity + ' <span class="err">&#10007; failed</span> <span class="dim">' + esc(r.execution_status) + "</span>");
+          continue;
+        }
+        html += assistantTurn(
+          entity + '  <span class="' + verdictClass(r.verdict) + '">' + esc(r.verdict || "Unknown") + "</span>" +
+          ' <span class="dim">' + esc(r.risk_score !== undefined ? r.risk_score : "?") + "/100 · " + esc(r.confidence || "n/a") + " confidence</span>"
+        );
+        if (r.summary) html += subLine(esc(r.summary));
+        if (r.reasoning) html += subLine('<span class="dim">' + esc(r.reasoning) + "</span>");
+        if (Array.isArray(r.recommended_actions) && r.recommended_actions.length) {
+          html += subLine('<span class="label">Recommended actions</span>' + plainList(r.recommended_actions, true));
+        }
       }
-      html += footer(result);
+      html += footer(first ? first.EntityResult : null);
       return html;
     }
 

@@ -1,10 +1,10 @@
-title: Claude - Alert Triage
+title: Claude - Entity Assessments
 type: html
 scope: alert
-action_identifier: Summarize Alert
-description: Shows the verdict, severity, narrative, findings, MITRE ATT&CK techniques, indicators and recommended actions produced by the Summarize Alert action. Output only, styled after the Claude Code terminal interface.
+action_identifier: Assess Entities
+description: Shows the verdict, risk score, summary and recommended actions Claude produced for every assessed entity. Output only, styled after the Claude Code terminal interface.
 data_definition:
-    html_height: 520
+    html_height: 460
     safe_rendering: false
     widget_definition_scope: both
     type: html
